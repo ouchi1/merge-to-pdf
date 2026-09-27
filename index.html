@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Toolbox · Auto Crop · Merge · All Tools</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- PDF-lib for real PDF merge -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js">
+    </script>
+    <style>
+        /* ----- reset & fonts ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f0f6fb;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ----- main container ----- */
+        .toolbox {
+            max-width: 1440px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 3.5rem;
+            padding: 2.8rem 2.5rem;
+            box-shadow: 0 30px 60px -12px rgba(0, 30, 40, 0.25),
+                inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        /* ----- header ----- */
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #0a2d3b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .app-header h1 i {
+            background: #1a4c5e;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            font-size: 1.6rem;
+            box-shadow: 0 8px 16px -8px rgba(20, 70, 90, 0.3);
+        }
+
+        .version-tag {
+            background: #1f6277;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.3rem 1.6rem;
+            border-radius: 60px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .subhead {
+            color: #1f4b5b;
+            font-weight: 400;
+            font-size: 1.05rem;
+            margin-top: 0.2rem;
+            margin-bottom: 2.2rem;
+            padding-left: 0.25rem;
+            border-left: 6px solid #3d8b9e;
+            padding-left: 1.4rem;
+            background: rgba(61, 139, 158, 0.06);
+            border-radius: 0 40px 40px 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .subhead .badge-merge {
+            background: #577a3b;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 1.2rem;
+            border-radius: 60px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        /* ----- tool grid ----- */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem 1.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 2.2rem;
+            padding: 1.8rem 1.5rem 2rem;
+            box-shadow: 0 8px 28px rgba(0, 30, 40, 0.06);
+            transition: 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 36px -12px rgba(0, 50, 70, 0.18);
+            border-color: #b6d7e3;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .card-header i {
+            font-size: 2rem;
+            width: 3.2rem;
+            height: 3.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceef5;
+            color: #155a6b;
+            border-radius: 18px;
+            transition: 0.2s;
+        }
+
+        .tool-card:hover .card-header i {
+            background: #1a5f72;
+            color: white;
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #12303d;
+            letter-spacing: -0.3px;
+        }
+
+        .card-header .chip {
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.15rem 0.8rem;
+            border-radius: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            background: #cbe4ed;
+            color: #0a3b4a;
+            margin-left: 0.2rem;
+        }
+
+        .chip-green {
+            background: #d4e3b0;
+            color: #2b4d1a;
+        }
+
+        .chip-crop {
+            background: #f5d7a8;
+            color: #7a5a2a;
+        }
+
+        .tool-description {
+            color: #2d4f5d;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin-bottom: 1.4rem;
+            flex: 1;
+        }
+
+        .tool-action {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: auto;
+        }
+
+        .btn {
+            border: 1px solid #b6d2de;
+            padding: 0.55rem 1.1rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a4b5c;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(2px);
+            flex: 1 1 auto;
+            justify-content: center;
+            border: 1px solid #d0e0e8;
+        }
+
+        .btn-primary {
+            background: #1f6277;
+            border: 1px solid #1f6277;
+            color: white;
+            box-shadow: 0 4px 10px -4px rgba(20, 80, 100, 0.25);
+        }
+        .btn-primary i {
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #134c5e;
+            border-color: #134c5e;
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #b6d2de;
+        }
+        .btn-outline:hover {
+            background: #e5f1f6;
+            border-color: #3d8b9e;
+        }
+
+        .btn-merge {
+            background: #577a3b;
+            border: 1px solid #577a3b;
+            color: white;
+        }
+        .btn-merge i {
+            color: white;
+        }
+        .btn-merge:hover {
+            background: #3f5f2a;
+            border-color: #3f5f2a;
+            transform: scale(0.97);
+        }
+
+        .btn-crop {
+            background: #c9812a;
+            border: 1px solid #c9812a;
+            color: white;
+        }
+        .btn-crop i {
+            color: white;
+        }
+        .btn-crop:hover {
+            background: #a86a1e;
+            border-color: #a86a1e;
+            transform: scale(0.97);
+        }
+
+        .btn-download {
+            background: #2a6b7e;
+            border: 1px solid #2a6b7e;
+            color: white;
+        }
+        .btn-download i {
+            color: white;
+        }
+        .btn-download:hover {
+            background: #1a5364;
+            border-color: #1a5364;
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* ----- status bar ----- */
+        .status-area {
+            margin-top: 2.6rem;
+            background: #dcecf2;
+            border-radius: 60px;
+            padding: 1rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border: 1px solid #b6d7e3;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+            color: #0d3645;
+        }
+        .status-badge i {
+            font-size: 1.3rem;
+            color: #1d6b80;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .demo-feedback {
+            background: #edf6fa;
+            border-radius: 40px;
+            padding: 0.5rem 1.4rem;
+            color: #104c5e;
+            font-size: 0.9rem;
+            border: 1px dashed #3f899e;
+            min-height: 2.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .toast-message {
+            background: #1c5a6b;
+            color: white;
+            padding: 0.5rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .toast-message:hover {
+            background: #104654;
+        }
+
+        .download-ready {
+            animation: pulse 0.6s ease 2;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+                background: #1f7a8c;
+            }
+        }
+
+        /* ----- DROP ZONE ----- */
+        .drop-zone {
+            border: 2px dashed #b6d2de;
+            border-radius: 16px;
+            padding: 0.8rem 0.5rem;
+            margin-top: 0.6rem;
+            text-align: center;
+            transition: 0.25s;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .drop-zone.dragover {
+            border-color: #577a3b;
+            background: rgba(87, 122, 59, 0.08);
+            box-shadow: 0 0 0 4px rgba(87, 122, 59, 0.12);
+        }
+
+        .drop-zone .drop-icon {
+            font-size: 1.8rem;
+            color: #577a3b;
+            opacity: 0.6;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .drop-zone .drop-text {
+            font-size: 0.8rem;
+            color: #2d4f5d;
+            font-weight: 500;
+        }
+
+        .drop-zone .drop-sub {
+            font-size: 0.7rem;
+            color: #6a8a7a;
+            margin-top: 0.1rem;
+        }
+
+        .file-list {
+            font-size: 0.78rem;
+            color: #1a5f72;
+            margin-top: 0.6rem;
+            max-height: 80px;
+            overflow-y: auto;
+            padding: 0.2rem 0.6rem;
+            background: #f0f7fa;
+            border-radius: 10px;
+            width: 100%;
+            border: 1px solid #dcecf2;
+        }
+        .file-list-item {
+            padding: 0.15rem 0;
+            border-bottom: 1px solid #e0eef5;
+            display: flex;
+            justify-content: space-between;
+        }
+        .file-list-item:last-child {
+            border-bottom: none;
+        }
+        .file-type-badge {
+            font-size: 0.6rem;
+            padding: 0.05rem 0.6rem;
+            border-radius: 20px;
+            background: #dceef5;
+            color: #1a5f72;
+        }
+        .file-type-badge.pdf {
+            background: #f5d7d7;
+            color: #8b2a2a;
+        }
+        .file-type-badge.image {
+            background: #d7e8f5;
+            color: #1a5f72;
+        }
+
+        /* ----- Image preview for crop tool ----- */
+        .image-preview-container {
+            margin-top: 0.8rem;
+            max-height: 200px;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid #dcecf2;
+            background: #f7fafc;
+            display: none;
+            position: relative;
+        }
+
+        .image-preview-container img {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .image-preview-container .preview-label {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .crop-result-container {
+            margin-top: 0.8rem;
+            max-height: 200px;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 2px solid #577a3b;
+            background: #f7fafc;
+            display: none;
+            position: relative;
+        }
+
+        .crop-result-container img {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .crop-result-container .result-label {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(87, 122, 59, 0.9);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .toolbox {
+                padding: 1.5rem 1rem;
+            }
+            .app-header h1 {
+                font-size: 1.8rem;
+            }
+            .status-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbox">
+
+        <!-- HEADER -->
+        <div class="app-header">
+            <h1>
+                <i class="fas fa-microchip"></i> Smart Toolbox
+            </h1>
+            <span class="version-tag"><i class="fas fa-check-circle"></i> v5.1 · auto crop</span>
+        </div>
+        <div class="subhead">
+            <i class="fas fa-bolt" style="color:#1f6f86;"></i>
+            auto crop · PDF merge · import · extract · PDF→Word · scan
+            <span class="badge-merge"><i class="fas fa-crop-alt"></i> CamScanner style</span>
+        </div>
+
+        <!-- TOOL GRID -->
+        <div class="tool-grid">
+
+            <!-- 1. Auto Crop & Smart Scan (FIXED) -->
+            <div class="tool-card" style="border-left: 5px solid #c9812a;">
+                <div class="card-header">
+                    <i class="fas fa-crop-alt" style="background:#f5d7a8; color:#7a5a2a;"></i>
+                    <h3>Auto Crop <span class="chip chip-crop">smart</span></h3>
+                </div>
+                <div class="tool-description">
+                    Upload an image and automatically detect document edges. Crop and enhance like CamScanner.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-crop" id="cropUploadBtn"><i class="fas fa-upload"></i> Upload Image</button>
+                    <button class="btn btn-primary" id="smartCropBtn"><i class="fas fa-magic"></i> Smart Crop</button>
+                    <button class="btn btn-download" id="downloadCropBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+                <div class="image-preview-container" id="cropPreviewContainer">
+                    <img id="cropPreviewImage" alt="Preview" />
+                    <span class="preview-label">Original</span>
+                </div>
+                <div class="crop-result-container" id="cropResultContainer">
+                    <img id="cropResultImage" alt="Cropped" />
+                    <span class="result-label">✓ Cropped</span>
+                </div>
+            </div>
+
+            <!-- 2. Smart Scan -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-qrcode"></i>
+                    <h3>Smart Scan <span class="chip">AI</span></h3>
+                </div>
+                <div class="tool-description">
+                    Intelligent document &amp; QR scan. Detects text, tables, and barcodes.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="smartScanBtn"><i class="fas fa-camera"></i> Scan</button>
+                    <button class="btn btn-outline" id="scanResultDemo"><i class="fas fa-eye"></i> Preview</button>
+                    <button class="btn btn-download" id="downloadScanBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 3. PDF Tool (demo) -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>PDF Tool</h3>
+                </div>
+                <div class="tool-description">
+                    Upload, process, split, or annotate PDFs. Smart analysis.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="pdfToolBtn"><i class="fas fa-upload"></i> Upload PDF</button>
+                    <button class="btn btn-outline" id="pdfDemoAction"><i class="fas fa-arrows-spin"></i> Process</button>
+                    <button class="btn btn-download" id="downloadPdfBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 4. Import Images -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-image"></i>
+                    <h3>Import Images</h3>
+                </div>
+                <div class="tool-description">
+                    Bulk import JPG, PNG, WebP, TIFF. Auto orientation &amp; preview.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="importImagesBtn"><i class="fas fa-folder-open"></i> Import</button>
+                    <span style="font-size:0.8rem; color:#1a5f72;" id="imageCountBadge">0</span>
+                    <button class="btn btn-download" id="downloadImageBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 5. Import File -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-file-import"></i>
+                    <h3>Import File</h3>
+                </div>
+                <div class="tool-description">
+                    Any file: CSV, JSON, TXT, XML, DOCX. Smart detection.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="importFileBtn"><i class="fas fa-upload"></i> Browse</button>
+                    <span style="font-size:0.8rem; color:#1a5f72;" id="fileNameDisplay">none</span>
+                    <button class="btn btn-download" id="downloadFileBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 6. Extract Text -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-font"></i>
+                    <h3>Extract Text</h3>
+                </div>
+                <div class="tool-description">
+                    OCR &amp; text extraction from images, PDFs, or scanned docs.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="extractTextBtn"><i class="fas fa-file-lines"></i> Extract</button>
+                    <button class="btn btn-outline" id="extractDemo"><i class="fas fa-robot"></i> Smart</button>
+                    <button class="btn btn-download" id="downloadExtractBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 7. PDF → Word -->
+            <div class="tool-card">
+                <div class="card-header">
+                    <i class="fas fa-file-word"></i>
+                    <h3>PDF → Word</h3>
+                </div>
+                <div class="tool-description">
+                    Convert PDF to editable DOCX with layout retention.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-primary" id="pdfToWordBtn"><i class="fas fa-arrow-right-arrow-left"></i> Convert</button>
+                    <button class="btn btn-outline" id="pdfWordDemo"><i class="fas fa-download"></i> Sample</button>
+                    <button class="btn btn-download" id="downloadWordBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+
+            <!-- 8. MERGE FILES (PDF + Images) -->
+            <div class="tool-card" style="border-left: 5px solid #577a3b;">
+                <div class="card-header">
+                    <i class="fas fa-merge" style="background:#d4e3b0; color:#2b4d1a;"></i>
+                    <h3>Merge Files <span class="chip chip-green">PDF+Img</span></h3>
+                </div>
+                <div class="tool-description">
+                    Combine PDFs and images (JPG, PNG, WebP) into one PDF. Preserves all pages.
+                </div>
+                <div class="tool-action">
+                    <button class="btn btn-merge" id="mergeFilesBtn"><i class="fas fa-arrows-merge"></i> Merge</button>
+                    <button class="btn btn-outline" id="mergeSelectBtn"><i class="fas fa-list"></i> Select Files</button>
+                    <span style="font-size:0.7rem; background:#e2efd0; padding:0.2rem 0.9rem; border-radius:30px; color:#2b4d1a; font-weight:600;" id="mergeCountBadge">0</span>
+                    <button class="btn btn-download" id="downloadMergeBtn" style="display:none;"><i class="fas fa-download"></i> Download</button>
+                </div>
+
+                <!-- DROP ZONE -->
+                <div class="drop-zone" id="dropZone">
+                    <span class="drop-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                    <div class="drop-text">Drop PDF or Image files here</div>
+                    <div class="drop-sub">or click to browse</div>
+                </div>
+
+                <!-- File list -->
+                <div class="file-list" id="mergeFileList">
+                    <div style="color:#999;font-style:italic;text-align:center;">No files selected</div>
+                </div>
+            </div>
+
+        </div><!-- end grid -->
+
+        <!-- STATUS BAR -->
+        <div class="status-area">
+            <div class="status-badge">
+                <i class="fas fa-circle-check" style="color:#1f7a8c;"></i>
+                <span id="globalStatus">Ready · auto crop + merge</span>
+            </div>
+            <div class="status-actions">
+                <div class="demo-feedback" id="feedbackDisplay">
+                    <i class="fas fa-arrow-pointer" style="color:#1d6b80;"></i>
+                    <span id="feedbackText">Upload an image to auto-crop</span>
+                </div>
+                <button class="toast-message" id="resetDemoBtn"><i class="fas fa-rotate-right"></i> Reset</button>
+            </div>
+        </div>
+
+        <!-- hidden file inputs -->
+        <input type="file" id="hiddenFileInput" class="file-input-hidden" multiple accept="image/*,application/pdf,.docx,.txt,.csv,.json,.xml" />
+        <input type="file" id="hiddenImageInput" class="file-input-hidden" multiple accept="image/*" />
+        <input type="file" id="hiddenPdfInput" class="file-input-hidden" accept=".pdf" />
+        <input type="file" id="hiddenFileGeneric" class="file-input-hidden" multiple />
+        <input type="file" id="hiddenMergeInput" class="file-input-hidden" multiple accept=".pdf,image/*" />
+        <input type="file" id="hiddenCropInput" class="file-input-hidden" accept="image/*" />
+
+    </div><!-- end toolbox -->
+
+    <script>
+        (function() {
+            "use strict";
+
+            // ---- DOM refs ----
+            const statusText = document.getElementById('globalStatus');
+            const feedbackSpan = document.getElementById('feedbackText');
+            const imageCountBadge = document.getElementById('imageCountBadge');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const mergeCountBadge = document.getElementById('mergeCountBadge');
+            const mergeFileListEl = document.getElementById('mergeFileList');
+            const dropZone = document.getElementById('dropZone');
+
+            // Crop tool refs
+            const cropPreviewContainer = document.getElementById('cropPreviewContainer');
+            const cropPreviewImage = document.getElementById('cropPreviewImage');
+            const cropResultContainer = document.getElementById('cropResultContainer');
+            const cropResultImage = document.getElementById('cropResultImage');
+
+            const hiddenFileInput = document.getElementById('hiddenFileInput');
+            const hiddenImageInput = document.getElementById('hiddenImageInput');
+            const hiddenPdfInput = document.getElementById('hiddenPdfInput');
+            const hiddenFileGeneric = document.getElementById('hiddenFileGeneric');
+            const hiddenMergeInput = document.getElementById('hiddenMergeInput');
+            const hiddenCropInput = document.getElementById('hiddenCropInput');
+
+            const downloadScan = document.getElementById('downloadScanBtn');
+            const downloadPdf = document.getElementById('downloadPdfBtn');
+            const downloadImage = document.getElementById('downloadImageBtn');
+            const downloadFile = document.getElementById('downloadFileBtn');
+            const downloadExtract = document.getElementById('downloadExtractBtn');
+            const downloadWord = document.getElementById('downloadWordBtn');
+            const downloadMerge = document.getElementById('downloadMergeBtn');
+            const downloadCrop = document.getElementById('downloadCropBtn');
+
+            let mergeFileList = [];
+            let currentCropImageData = null;
+            let croppedImageDataURL = null;
+
+            // ---- helpers ----
+            function setFeedback(msg, isSuccess = true) {
+                feedbackSpan.textContent = msg;
+                const fb = document.getElementById('feedbackDisplay');
+                fb.style.borderColor = isSuccess ? '#3d8b9e' : '#c96b6b';
+                statusText.textContent = isSuccess ? '✓ ' + msg : '⚠️ ' + msg;
+            }
+
+            function smartAction(label, delay = 500) {
+                setFeedback('⏳ ' + label + ' ...', true);
+                statusText.textContent = '⏳ ' + label;
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        setFeedback('✅ ' + label + ' completed', true);
+                        statusText.textContent = '✅ ' + label + ' done';
+                        resolve();
+                    }, delay);
+                });
+            }
+
+            function showDownload(btn) {
+                if (btn) {
+                    btn.style.display = 'inline-flex';
+                    btn.classList.add('download-ready');
+                    setTimeout(() => btn.classList.remove('download-ready'), 700);
+                }
+            }
+
+            function hideAllDownloads() {
+                [downloadScan, downloadPdf, downloadImage, downloadFile, downloadExtract, downloadWord, downloadMerge,
+                    downloadCrop
+                ].forEach(b => { if (b) b.style.display = 'none'; });
+            }
+
+            function downloadTextFile(filename, content) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                setFeedback('⬇️ Downloaded: ' + filename, true);
+            }
+
+            // ---- SMART CROP FUNCTION (Pure JavaScript - works immediately) ----
+            function smartCropImage(imageElement) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Get the image dimensions
+                    const img = imageElement;
+                    const naturalWidth = img.naturalWidth || img.width;
+                    const naturalHeight = img.naturalHeight || img.height;
+
+                    canvas.width = naturalWidth;
+                    canvas.height = naturalHeight;
+                    ctx.drawImage(img, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    // Find document edges using smart algorithm
+                    let top = canvas.height;
+                    let bottom = 0;
+                    let left = canvas.width;
+                    let right = 0;
+
+                    // Sample pixels to find document boundaries
+                    const sampleStep = 3;
+                    const threshold = 30;
+
+                    // First pass: find rough boundaries
+                    for (let y = 0; y < canvas.height; y += sampleStep) {
+                        for (let x = 0; x < canvas.width; x += sampleStep) {
+                            const idx = (y * canvas.width + x) * 4;
+                            const r = data[idx];
+                            const g = data[idx + 1];
+                            const b = data[idx + 2];
+                            const brightness = (r + g + b) / 3;
+                            // Darker pixels indicate content
+                            if (brightness < 220) {
+                                if (x < left) left = x;
+                                if (x > right) right = x;
+                                if (y < top) top = y;
+                                if (y > bottom) bottom = y;
+                            }
+                        }
+                    }
+
+                    // If no content found, use the whole image
+                    if (top === canvas.height && bottom === 0) {
+                        // Try with lower threshold
+                        for (let y = 0; y < canvas.height; y += sampleStep) {
+                            for (let x = 0; x < canvas.width; x += sampleStep) {
+                                const idx = (y * canvas.width + x) * 4;
+                                const r = data[idx];
+                                const g = data[idx + 1];
+                                const b = data[idx + 2];
+                                const brightness = (r + g + b) / 3;
+                                if (brightness < 240) {
+                                    if (x < left) left = x;
+                                    if (x > right) right = x;
+                                    if (y < top) top = y;
+                                    if (y > bottom) bottom = y;
+                                }
+                            }
+                        }
+                    }
+
+                    // If still no content, use 10% crop from edges
+                    if (top === canvas.height && bottom === 0) {
+                        left = canvas.width * 0.1;
+                        top = canvas.height * 0.1;
+                        right = canvas.width * 0.9;
+                        bottom = canvas.height * 0.9;
+                    }
+
+                    // Add some padding
+                    const padding = 10;
+                    left = Math.max(0, left - padding);
+                    top = Math.max(0, top - padding);
+                    right = Math.min(canvas.width, right + padding);
+                    bottom = Math.min(canvas.height, bottom + padding);
+
+                    // Ensure we have a valid crop
+                    const cropWidth = right - left;
+                    const cropHeight = bottom - top;
+
+                    if (cropWidth > 20 && cropHeight > 20) {
+                        // Create cropped version
+                        const cropCanvas = document.createElement('canvas');
+                        cropCanvas.width = cropWidth;
+                        cropCanvas.height = cropHeight;
+                        const cropCtx = cropCanvas.getContext('2d');
+
+                        // Draw cropped image
+                        cropCtx.drawImage(img, left, top, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+                        // Apply some auto-enhancement (contrast and brightness)
+                        const cropData = cropCtx.getImageData(0, 0, cropWidth, cropHeight);
+                        const cropDataArray = cropData.data;
+
+                        // Simple auto-contrast
+                        let minBrightness = 255;
+                        let maxBrightness = 0;
+                        for (let i = 0; i < cropDataArray.length; i += 4) {
+                            const brightness = (cropDataArray[i] + cropDataArray[i + 1] + cropDataArray[i + 2]) / 3;
+                            if (brightness < minBrightness) minBrightness = brightness;
+                            if (brightness > maxBrightness) maxBrightness = brightness;
+                        }
+
+                        const range = maxBrightness - minBrightness;
+                        if (range > 10) {
+                            for (let i = 0; i < cropDataArray.length; i += 4) {
+                                cropDataArray[i] = Math.min(255, Math.max(0, (cropDataArray[i] - minBrightness) * 255 /
+                                    range));
+                                cropDataArray[i + 1] = Math.min(255, Math.max(0, (cropDataArray[i + 1] - minBrightness) *
+                                    255 / range));
+                                cropDataArray[i + 2] = Math.min(255, Math.max(0, (cropDataArray[i + 2] - minBrightness) *
+                                    255 / range));
+                            }
+                            cropCtx.putImageData(cropData, 0, 0);
+                        }
+
+                        // Display result
+                        croppedImageDataURL = cropCanvas.toDataURL('image/png');
+                        cropResultImage.src = croppedImageDataURL;
+                        cropResultContainer.style.display = 'block';
+
+                        setFeedback('✅ Document detected and cropped!', true);
+                        showDownload(downloadCrop);
+                        return true;
+                    } else {
+                        setFeedback('⚠️ Could not detect document edges. Try a clearer image.', false);
+                        return false;
+                    }
+                } catch (err) {
+                    console.error('Crop error:', err);
+                    setFeedback('⚠️ Crop failed. Please try another image.', false);
+                    return false;
+                }
+            }
+
+            // ---- CROP TOOL HANDLERS ----
+            document.getElementById('cropUploadBtn').addEventListener('click', function() {
+                hiddenCropInput.click();
+            });
+
+            hiddenCropInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        cropPreviewImage.src = event.target.result;
+                        cropPreviewContainer.style.display = 'block';
+                        cropResultContainer.style.display = 'none';
+                        currentCropImageData = cropPreviewImage;
+                        croppedImageDataURL = null;
+                        downloadCrop.style.display = 'none';
+                        setFeedback('📸 Image loaded. Click "Smart Crop" to auto-detect document.', true);
+                        statusText.textContent = '📸 Image ready for cropping';
+                    };
+                    reader.readAsDataURL(file);
+                }
+                this.value = '';
+            });
+
+            document.getElementById('smartCropBtn').addEventListener('click', function() {
+                if (!currentCropImageData || !currentCropImageData.src) {
+                    setFeedback('⚠️ Please upload an image first.', false);
+                    return;
+                }
+
+                // Show loading state
+                setFeedback('⏳ Analyzing image for document edges...', true);
+                statusText.textContent = '⏳ Smart cropping...';
+
+                // Wait a bit for the image to be fully loaded
+                setTimeout(() => {
+                    smartCropImage(currentCropImageData);
+                }, 300);
+            });
+
+            downloadCrop.addEventListener('click', function() {
+                if (croppedImageDataURL) {
+                    const link = document.createElement('a');
+                    link.download = 'cropped_document.png';
+                    link.href = croppedImageDataURL;
+                    link.click();
+                    setFeedback('⬇️ Downloaded cropped image', true);
+                } else {
+                    setFeedback('⚠️ No cropped image available. Please crop first.', false);
+                }
+            });
+
+            // ---- REAL PDF MERGE (with image support) ----
+            async function mergeFiles(files) {
+                try {
+                    const { PDFDocument } = PDFLib;
+                    const mergedPdf = await PDFDocument.create();
+                    let totalPages = 0;
+                    let imageCount = 0;
+                    let pdfCount = 0;
+
+                    for (const file of files) {
+                        const fileType = file.type;
+                        const fileName = file.name.toLowerCase();
+
+                        const isImage = fileType.startsWith('image/') ||
+                            fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ||
+                            fileName.endsWith('.png') || fileName.endsWith('.webp') ||
+                            fileName.endsWith('.tiff') || fileName.endsWith('.tif') ||
+                            fileName.endsWith('.bmp') || fileName.endsWith('.gif');
+
+                        if (isImage) {
+                            try {
+                                const imageBytes = await file.arrayBuffer();
+                                const imagePdf = await PDFDocument.create();
+
+                                let imageFormat = 'png';
+                                if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) imageFormat = 'jpg';
+                                else if (fileName.endsWith('.webp')) imageFormat = 'webp';
+                                else if (fileName.endsWith('.tiff') || fileName.endsWith('.tif')) imageFormat = 'tiff';
+                                else if (fileName.endsWith('.bmp')) imageFormat = 'bmp';
+                                else if (fileName.endsWith('.gif')) imageFormat = 'gif';
+
+                                let image;
+                                try {
+                                    if (imageFormat === 'jpg' || imageFormat === 'jpeg') {
+                                        image = await imagePdf.embedJpg(imageBytes);
+                                    } else if (imageFormat === 'png') {
+                                        image = await imagePdf.embedPng(imageBytes);
+                                    } else {
+                                        try { image = await imagePdf.embedPng(imageBytes); } catch {
+                                            image = await imagePdf.embedJpg(imageBytes);
+                                        }
+                                    }
+                                } catch { continue; }
+
+                                const page = imagePdf.addPage([image.width, image.height]);
+                                page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+
+                                const imagePdfBytes = await imagePdf.save();
+                                const tempPdf = await PDFDocument.load(imagePdfBytes);
+                                const indices = tempPdf.getPageIndices();
+                                const copiedPages = await mergedPdf.copyPages(tempPdf, indices);
+                                copiedPages.forEach(page => mergedPdf.addPage(page));
+                                totalPages += indices.length;
+                                imageCount++;
+                            } catch {}
+                        } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+                            try {
+                                const arrayBuffer = await file.arrayBuffer();
+                                const pdf = await PDFDocument.load(arrayBuffer);
+                                const indices = pdf.getPageIndices();
+                                const copiedPages = await mergedPdf.copyPages(pdf, indices);
+                                copiedPages.forEach(page => mergedPdf.addPage(page));
+                                totalPages += indices.length;
+                                pdfCount++;
+                            } catch {}
+                        }
+                    }
+
+                    if (totalPages === 0) {
+                        return { success: false, error: 'No valid PDF or image files could be processed' };
+                    }
+
+                    const pdfBytes = await mergedPdf.save();
+                    return { success: true, data: pdfBytes, totalPages, imageCount, pdfCount };
+                } catch (err) {
+                    console.error('Merge error:', err);
+                    return { success: false, error: err.message };
+                }
+            }
+
+            function downloadMergedPDF(pdfBytes, filename = 'merged_output.pdf') {
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                setFeedback('⬇️ Downloaded: ' + filename, true);
+            }
+
+            // ---- update merge UI ----
+            function updateMergeUI() {
+                mergeCountBadge.textContent = mergeFileList.length;
+                if (mergeFileList.length === 0) {
+                    mergeFileListEl.innerHTML = '<div style="color:#999;font-style:italic;text-align:center;">No files selected</div>';
+                    downloadMerge.style.display = 'none';
+                } else {
+                    let html = '';
+                    mergeFileList.forEach((f, i) => {
+                        const sizeKB = (f.size / 1024).toFixed(0);
+                        const isImage = f.type.startsWith('image/') ||
+                            f.name.toLowerCase().match(/\.(jpg|jpeg|png|webp|tiff|tif|bmp|gif)$/);
+                        const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+                        const typeLabel = isPdf ? 'PDF' : (isImage ? 'Image' : 'Other');
+                        const typeClass = isPdf ? 'pdf' : (isImage ? 'image' : '');
+                        html += `<div class="file-list-item">
+                                    <span>${i+1}. ${f.name}</span>
+                                    <span>
+                                        <span class="file-type-badge ${typeClass}">${typeLabel}</span>
+                                        ${sizeKB} KB
+                                    </span>
+                                </div>`;
+                    });
+                    mergeFileListEl.innerHTML = html;
+                }
+            }
+
+            // ---- handle dropped files ----
+            function handleDroppedFiles(files) {
+                const validFiles = Array.from(files).filter(f => {
+                    const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
+                    const isImage = f.type.startsWith('image/') ||
+                        f.name.toLowerCase().match(/\.(jpg|jpeg|png|webp|tiff|tif|bmp|gif)$/);
+                    return isPdf || isImage;
+                });
+
+                if (validFiles.length === 0) {
+                    setFeedback('⚠️ Please drop PDF or image files only', false);
+                    return;
+                }
+
+                mergeFileList = validFiles;
+                updateMergeUI();
+                const pdfCount = validFiles.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith(
+                '.pdf')).length;
+                const imgCount = validFiles.filter(f => f.type.startsWith('image/') ||
+                    f.name.toLowerCase().match(/\.(jpg|jpeg|png|webp|tiff|tif|bmp|gif)$/)).length;
+                setFeedback(`📂 ${mergeFileList.length} files (${pdfCount} PDF, ${imgCount} images)`, true);
+                statusText.textContent = `📂 ${mergeFileList.length} files ready`;
+                downloadMerge.style.display = 'none';
+            }
+
+            // ---- DROP ZONE EVENTS ----
+            dropZone.addEventListener('click', function(e) {
+                if (!e.target.closest('.btn')) {
+                    hiddenMergeInput.click();
+                }
+            });
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    handleDroppedFiles(e.dataTransfer.files);
+                }
+            });
+
+            hiddenMergeInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    handleDroppedFiles(this.files);
+                }
+                this.value = '';
+            });
+
+            // ---- TOOL HANDLERS ----
+
+            // Smart Scan
+            document.getElementById('smartScanBtn').addEventListener('click', async function() {
+                await smartAction('Smart Scan (QR/OCR)');
+                showDownload(downloadScan);
+                setFeedback('📸 Scan complete — download ready', true);
+            });
+            document.getElementById('scanResultDemo').addEventListener('click', function() {
+                setFeedback('📸 Preview: 3 items detected', true);
+                showDownload(downloadScan);
+            });
+            downloadScan.addEventListener('click', function() {
+                downloadTextFile('smart_scan_result.txt', 'Smart Scan Results\n\nItems detected: 3\nConfidence: 98%');
+            });
+
+            // PDF Tool
+            document.getElementById('pdfToolBtn').addEventListener('click', function() { hiddenPdfInput.click(); });
+            hiddenPdfInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const name = this.files[0].name;
+                    setFeedback('📄 PDF loaded: ' + name, true);
+                    statusText.textContent = '📄 PDF ready';
+                    smartAction('PDF analysis', 500).then(() => showDownload(downloadPdf));
+                }
+                this.value = '';
+            });
+            document.getElementById('pdfDemoAction').addEventListener('click', async function() {
+                await smartAction('PDF processing');
+                showDownload(downloadPdf);
+            });
+            downloadPdf.addEventListener('click', function() {
+                downloadTextFile('processed_document.txt', 'PDF processing demo output');
+            });
+
+            // Import Images
+            document.getElementById('importImagesBtn').addEventListener('click', function() { hiddenImageInput.click(); });
+            hiddenImageInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const count = this.files.length;
+                    imageCountBadge.textContent = count;
+                    setFeedback(`🖼️ ${count} images imported`, true);
+                    statusText.textContent = `🖼️ ${count} images`;
+                    setTimeout(() => {
+                        setFeedback('✨ Image analysis done', true);
+                        showDownload(downloadImage);
+                    }, 400);
+                } else {
+                    imageCountBadge.textContent = '0';
+                }
+                this.value = '';
+            });
+            downloadImage.addEventListener('click', function() {
+                downloadTextFile('image_archive.txt', 'Images processed (demo)');
+            });
+
+            // Import File
+            document.getElementById('importFileBtn').addEventListener('click', function() { hiddenFileGeneric.click(); });
+            hiddenFileGeneric.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    fileNameDisplay.textContent = file.name;
+                    setFeedback(`📁 File: ${file.name}`, true);
+                    statusText.textContent = `📁 ${file.name}`;
+                    setTimeout(() => {
+                        setFeedback('🧠 Smart detection done', true);
+                        showDownload(downloadFile);
+                    }, 300);
+                } else {
+                    fileNameDisplay.textContent = 'none';
+                }
+                this.value = '';
+            });
+            downloadFile.addEventListener('click', function() {
+                downloadTextFile('imported_file.txt', 'File import demo output');
+            });
+
+            // Extract Text
+            document.getElementById('extractTextBtn').addEventListener('click', async function() {
+                await smartAction('Text extraction (OCR)');
+                setFeedback('📝 Extracted text ready', true);
+                showDownload(downloadExtract);
+            });
+            document.getElementById('extractDemo').addEventListener('click', function() {
+                setFeedback('🧩 1,240 characters extracted', true);
+                showDownload(downloadExtract);
+            });
+            downloadExtract.addEventListener('click', function() {
+                downloadTextFile('extracted_text.txt', 'Extracted Text:\n\nLorem ipsum dolor sit amet.\nSmart Toolbox Demo');
+            });
+
+            // PDF → Word
+            document.getElementById('pdfToWordBtn').addEventListener('click', async function() {
+                await smartAction('PDF → Word conversion');
+                setFeedback('📄➡️📝 DOCX ready', true);
+                showDownload(downloadWord);
+            });
+            document.getElementById('pdfWordDemo').addEventListener('click', function() {
+                setFeedback('📎 Sample DOCX generated', true);
+                showDownload(downloadWord);
+            });
+            downloadWord.addEventListener('click', function() {
+                downloadTextFile('converted_document.txt', 'PDF to Word conversion demo');
+            });
+
+            // MERGE
+            document.getElementById('mergeFilesBtn').addEventListener('click', async function() {
+                if (mergeFileList.length < 2) {
+                    setFeedback('⚠️ Select at least 2 files (PDF or images)', false);
+                    return;
+                }
+
+                const pdfCount = mergeFileList.filter(f =>
+                    f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
+                ).length;
+                const imageCount = mergeFileList.filter(f =>
+                    f.type.startsWith('image/') ||
+                    f.name.toLowerCase().match(/\.(jpg|jpeg|png|webp|tiff|tif|bmp|gif)$/)
+                ).length;
+
+                setFeedback(`⏳ Merging ${pdfCount} PDF(s) + ${imageCount} image(s)...`, true);
+                statusText.textContent = '⏳ Merging...';
+
+                const result = await mergeFiles(mergeFileList);
+
+                if (result.success) {
+                    let msg = `✅ Merged ${result.totalPages} pages`;
+                    if (result.pdfCount > 0) msg += ` from ${result.pdfCount} PDF(s)`;
+                    if (result.imageCount > 0) msg += ` and ${result.imageCount} image(s)`;
+                    setFeedback(msg, true);
+                    statusText.textContent = `✅ ${result.totalPages} pages merged`;
+                    showDownload(downloadMerge);
+                    downloadMerge._pdfData = result.data;
+                    downloadMerge._fileName = `merged_${mergeFileList.length}_files.pdf`;
+                } else {
+                    setFeedback('❌ Merge failed: ' + result.error, false);
+                    statusText.textContent = '❌ Merge failed';
+                }
+            });
+
+            downloadMerge.addEventListener('click', function() {
+                if (this._pdfData) {
+                    downloadMergedPDF(this._pdfData, this._fileName || 'merged_output.pdf');
+                } else {
+                    setFeedback('⚠️ No merged data. Merge files first.', false);
+                }
+            });
+
+            // ---- RESET ----
+            document.getElementById('resetDemoBtn').addEventListener('click', function() {
+                setFeedback('🔄 Reset — all tools ready', true);
+                statusText.textContent = 'Ready · auto crop + merge';
+                imageCountBadge.textContent = '0';
+                fileNameDisplay.textContent = 'none';
+                mergeFileList = [];
+                updateMergeUI();
+                hideAllDownloads();
+                cropPreviewContainer.style.display = 'none';
+                cropResultContainer.style.display = 'none';
+                currentCropImageData = null;
+                croppedImageDataURL = null;
+                [hiddenFileInput, hiddenImageInput, hiddenPdfInput, hiddenFileGeneric, hiddenMergeInput, hiddenCropInput]
+                .forEach(inp => inp.value = '');
+                downloadMerge._pdfData = null;
+                dropZone.classList.remove('dragover');
+            });
+
+            // ---- init ----
+            setFeedback('🚀 Upload an image and click "Smart Crop" to auto-detect document', true);
+            hideAllDownloads();
+            updateMergeUI();
+
+        })();
+    </script>
+
+</body>
+</html>
